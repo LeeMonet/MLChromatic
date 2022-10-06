@@ -77,7 +77,7 @@ class RLearner:
     print(f'This learner has been set to generate graphs with {self.N} vertices. \n'
            +f'The agent will be trained with a learning rate of {self.LR} over {self.n_generations} rounds with {self.n_sessions} games each. \n' 
           +f'In each game, the agent will make {self.MYN} decisions. The top {100-self.elite_percentile} percent of games will be used to train the agent.'  
-          +f' The top {100-self.super_percentile} percent of games will survive to the next round. \n The following is the architecture of the agent:')
+          +f' The top {100-self.super_percentile} percent of games will survive to the next round. \nThe following is the architecture of the agent:')
 
     print(self.agent.summary())
 

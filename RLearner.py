@@ -133,7 +133,7 @@ class RLearner:
         #if at last step, calculate reward and time it , leave loop(JN)         
         if step == MYN:
           tic = time.time() 
-          total_score[i] = calcScore(state_next[i])
+          total_score[i] = self.calcScore(state_next[i])
           scorecalc_time += time.time()-tic
         else: #if not at last step, record state (JN)
           tic = time.time()

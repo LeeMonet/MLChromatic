@@ -21,14 +21,19 @@ class RLearner:
 
   def __init__(self, N, calcScore,
                 learning_rate=0.0001, n_sessions =1000, agent = None,
-                elite_percentile=93, super_percentile=94):
+                elite_percentile=93, super_percentile=94,
+                n_generations=1000000):
 
     self.calcScore = calcScore #reward function
     self.N = N #number of vertices in graph
     self.n_actions = 2 #The size of the alphabet. In this file we will assume this is 2. There are a few things we need to change when the alphabet size is larger,
         #such as one-hot encoding the input, and using categorical_crossentropy as a loss function.
     self.LR = learning_rate #Increase this to make convergence faster, decrease if the algorithm gets stuck in local optima too often.
+    
     self.n_sessions =n_sessions #number of new sessions per iteration
+    self.n_generations = n_generations
+
+
     self.elite_percentile = elite_percentile #top 100-X percentile we are learning from
     self.super_percentile = super_percentile #top 100-X percentile that survives to next iteration
 
@@ -47,7 +52,7 @@ class RLearner:
                   
     state_dim = (self.observation_space,)
 
-
+    # Create NN
     if not agent:
       FIRST_LAYER_NEURONS = 128 #Number of neurons in the hidden layers.
       SECOND_LAYER_NEURONS = 64
@@ -67,6 +72,12 @@ class RLearner:
 
     self.agent.build((None, self.observation_space))
     self.agent.compile(loss="binary_crossentropy", optimizer=SGD(learning_rate = self.LR)) #Adam optimizer also works well, with lower learning rate
+
+
+    print(f'This learner has been set to generate graphs with {N} vertices. \n'
+           +f'The agent will be trained with a learning rate of {LR} over {self.n_generations} rounds with {self.n_sessions} games. \n' 
+          +f'In each game, the agent will make {self.MYN} decisions. The top {100-self.elite_percentile} percent of games will be used to train the agent.'  
+          +f'The top {100-self.super_percentile} percent of games will survive to the next round. \n The following is the architecture of the agent:')
 
     print(self.agent.summary())
 
@@ -221,7 +232,7 @@ class RLearner:
     if log_file_suffix==None:
       log_file_suffix= str(random.randint(0,1000)) #used in the filename
 
-    for i in range(1000000): #1000000 generations should be plenty
+    for i in range(self.n_generations): #1000000 generations should be plenty
 
       # generate new sessions
       # performance can be improved with joblib

@@ -74,8 +74,8 @@ class RLearner:
     self.agent.compile(loss="binary_crossentropy", optimizer=SGD(learning_rate = self.LR)) #Adam optimizer also works well, with lower learning rate
 
 
-    print(f'This learner has been set to generate graphs with {N} vertices. \n'
-           +f'The agent will be trained with a learning rate of {LR} over {self.n_generations} rounds with {self.n_sessions} games. \n' 
+    print(f'This learner has been set to generate graphs with {self.N} vertices. \n'
+           +f'The agent will be trained with a learning rate of {self.LR} over {self.n_generations} rounds with {self.n_sessions} games. \n' 
           +f'In each game, the agent will make {self.MYN} decisions. The top {100-self.elite_percentile} percent of games will be used to train the agent.'  
           +f'The top {100-self.super_percentile} percent of games will survive to the next round. \n The following is the architecture of the agent:')
 

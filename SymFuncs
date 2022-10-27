@@ -1,0 +1,4 @@
+class SymFuncs:
+
+
+  def __init__(self, N):

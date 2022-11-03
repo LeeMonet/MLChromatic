@@ -7,6 +7,64 @@ warnings.simplefilter('ignore', category=NumbaDeprecationWarning)
 warnings.simplefilter('ignore', category=NumbaPendingDeprecationWarning)
 
 
+def integer_partitions(n):
+  """"""
+  hold = []
+  p = [0] * n  # An array to store a partition
+  k = 0    # Index of last element in a partition
+  p[k] = n   # Initialize first partition
+        # as number itself
+
+  # This loop first prints current partition,
+  # then generates next partition.The loop
+  # stops when the current partition has all 1s
+  while True:
+    
+      # print current partition
+      temp = []
+      for i in range(0,k+1):
+        temp.append(p[i])
+      yield temp
+      hold.append(temp)
+
+      # Generate next partition
+
+      # Find the rightmost non-one value in p[].
+      # Also, update the rem_val so that we know
+      # how much value can be accommodated
+      rem_val = 0
+      while k >= 0 and p[k] == 1:
+        rem_val += p[k]
+        k -= 1
+
+      # if k < 0, all the values are 1 so
+      # there are no more partitions
+      if k < 0:
+        return
+
+      # Decrease the p[k] found above
+      # and adjust the rem_val
+      p[k] -= 1
+      rem_val += 1
+
+      # If rem_val is more, then the sorted
+      # order is violated. Divide rem_val in
+      # different values of size p[k] and copy
+      # these values at different positions after p[k]
+      while rem_val > p[k]:
+        p[k + 1] = p[k]
+        rem_val = rem_val - p[k]
+        k += 1
+
+      # Copy rem_val to next position
+      # and increment position
+      p[k + 1] = rem_val
+      k += 1
+
+n=10
+[part for part in all_partitions(n)]
+
+
 @jit
 def all_partitions(n):
   hold = []
@@ -62,11 +120,15 @@ def all_partitions(n):
       k += 1
 
 
+  import more_itertools as mit
+  lst = list(range(1,n+1))
+  mit.set_partitions(lst)
+
 
 import more_itertools as mit
 def all_set_partitions(n):
   lst = list(range(1,n+1))
-  return [part for k in range(1, len(lst) + 1) for part in mit.set_partitions(lst, k)]
+  return [part for part in mit.set_partitions(lst, k)]
 
 
 def binary_words(n,k):
@@ -163,7 +225,7 @@ def m_to_e_matrix(a,mu, N):
 
 
 
-@jit()
+@jit(forceobj=True)
 def makeMatrix(N, set_p = False):
   #This cell has permanant values that will be used in future methods to save on run time
   PARTITIONS = all_partitions(N) #the collection of integer partitions

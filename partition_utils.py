@@ -97,8 +97,8 @@ def binary_matricies(pi, N):
     B = binary_words(N,pi[0])
     return [[w] for w in B]
   m = len(pi)
-  S = binary_matricies(pi[0:m-1])
-  row = binary_matricies([pi[m-1]])
+  S = binary_matricies(pi[0:m-1], N)
+  row = binary_matricies([pi[m-1]], N)
   R = []
   for s in S:
     for r in row:

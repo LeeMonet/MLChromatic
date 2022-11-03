@@ -87,7 +87,7 @@ def binary_words(n,k):
   return R
 
 
-def binary_matricies(pi):
+def binary_matricies(pi, N):
   """
   Given an integer partition pi this will return all len(pi)xN matricies
   row i will have a row sum of pi[i]
@@ -137,7 +137,7 @@ def partition_to_string(pi):
   return s+']'
 
 
-def m_to_e_matrix(a,mu):
+def m_to_e_matrix(a,mu, N):
   """
   a and mu are integer partitions
   This counts the number of 0-1 matrices with no zero rows or columns
@@ -145,7 +145,7 @@ def m_to_e_matrix(a,mu):
   the column sum is mu
   """
   #print(a, mu, "checking term")
-  matricies = binary_matricies(a)
+  matricies = binary_matricies(a, N)
   count = 0
   for M in matricies:
     #print(M, "matrix")
@@ -165,8 +165,6 @@ def m_to_e_matrix(a,mu):
 
 @jit()
 def makeMatrix(inpt):
-  global N
-  N=inpt
   #This cell has permanant values that will be used in future methods to save on run time
   PARTITIONS = all_partitions(N) #the collection of integer partitions
   SET_PARTITIONS = all_set_partitions(N)
@@ -180,6 +178,6 @@ def makeMatrix(inpt):
       strpi = partition_to_string(pi)
       strmu = partition_to_string(mu)
       #print(m_to_e_matrix(pi,mu))
-      (M_TO_E_MATRIX[strpi])[strmu] = m_to_e_matrix(pi,mu)
+      (M_TO_E_MATRIX[strpi])[strmu] = m_to_e_matrix(pi,mu, N)
 
     return M_TO_E_MATRIX, PARTITIONS, SET_PARTITIONS

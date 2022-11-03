@@ -61,8 +61,7 @@ def integer_partitions(n):
       p[k + 1] = rem_val
       k += 1
 
-n=10
-[part for part in all_partitions(n)]
+
 
 
 @jit

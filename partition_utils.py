@@ -155,8 +155,8 @@ def m_to_e_matrix(a,mu):
 @jit()
 def makeMatrix(N):
   #This cell has permanant values that will be used in future methods to save on run time
-  PARTITIONS = all_partitions2(N) #the collection of integer partitions
-  SET_PARTITIONS = all_set_partitions2(N)
+  PARTITIONS = all_partitions(N) #the collection of integer partitions
+  SET_PARTITIONS = all_set_partitions(N)
 
   #This cell has permanant values that will be used in future methods to save on run time
 

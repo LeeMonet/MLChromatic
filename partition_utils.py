@@ -124,6 +124,17 @@ def column_sum(M):
     c += [d]
   return c
 
+def partition_to_string(pi):
+  """
+  pi is an integer partition as a list like [3,1,1]
+  this changes the data type to a string for our dictoraries
+  """
+  if len(pi)==0:
+    return '[]'
+  s = '['+ str(pi[0])
+  for i in range(1,len(pi)):
+    s = s + ',' + str(pi[i])
+  return s+']'
 
 
 def m_to_e_matrix(a,mu):

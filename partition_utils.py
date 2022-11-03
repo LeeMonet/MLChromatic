@@ -164,11 +164,11 @@ def m_to_e_matrix(a,mu, N):
 
 
 @jit()
-def makeMatrix(N):
+def makeMatrix(N, set_p = False):
   #This cell has permanant values that will be used in future methods to save on run time
   PARTITIONS = all_partitions(N) #the collection of integer partitions
-  SET_PARTITIONS = all_set_partitions(N)
 
+  
   #This cell has permanant values that will be used in future methods to save on run time
 
   M_TO_E_MATRIX = {partition_to_string(pi):{partition_to_string(mu):0 for mu in PARTITIONS} for pi in PARTITIONS}
@@ -180,4 +180,8 @@ def makeMatrix(N):
       #print(m_to_e_matrix(pi,mu))
       (M_TO_E_MATRIX[strpi])[strmu] = m_to_e_matrix(pi,mu, N)
 
+  if set_p:
+    SET_PARTITIONS = all_set_partitions(N)
     return M_TO_E_MATRIX, PARTITIONS, SET_PARTITIONS
+
+  return M_TO_E_MATRIX, PARTITIONS

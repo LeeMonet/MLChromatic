@@ -164,7 +164,9 @@ def m_to_e_matrix(a,mu):
 
 
 @jit()
-def makeMatrix(N):
+def makeMatrix(inpt):
+  global N
+  N=inpt
   #This cell has permanant values that will be used in future methods to save on run time
   PARTITIONS = all_partitions(N) #the collection of integer partitions
   SET_PARTITIONS = all_set_partitions(N)

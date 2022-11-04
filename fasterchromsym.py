@@ -12,6 +12,9 @@ Original file is located at
 import math
 import more_itertools as mit
 import scipy.special
+import numpy as np 
+
+
 def integer_partitions(n):
   """"""
   hold = []
@@ -85,11 +88,13 @@ def min_nonzero(F):
       if int(F[j])<c:
         c = int(F[j])
   return c
+
 #These methods will take operate on a graph g written as a bitstring of edges.
 def number_of_vertices(g):
   a = len(g)
   a = 2*a
   return int(math.sqrt(a)+1)
+
 def edge_to_index(n,a,b):
   """
   The hard part is g is given as a (n choose 2) binary tuple
@@ -102,6 +107,7 @@ def edge_to_index(n,a,b):
   for i in range(1,a):
     s += n-i
   return s+b-a-1
+
 def index_to_edge(n,i):
   """
   The hard part is g is given as a (n choose 2) binary tuple
@@ -120,6 +126,7 @@ def index_to_edge(n,i):
       afound = True
       b = s-i+n+1
   return [a,b]
+
 def g_has_edge(g,n,a,b):
   """
   Will return true if there is an edge a to b.
@@ -128,7 +135,6 @@ def g_has_edge(g,n,a,b):
   if g[edge_to_index(n,a,b)]==1:
     return True
   return False
-
 
 def claw_count(g,n):
   """
@@ -151,6 +157,7 @@ def claw_count(g,n):
           if deg == [1,1,1,3]:
             count += 1
   return count
+
 def is_connected(g,n,a,b,c):
   """
   Given a graph g on n vertices (g given as a binary list of edges)
@@ -170,6 +177,8 @@ def is_connected(g,n,a,b,c):
   if alpha == [n-3,1,1,1]:
     return True
   return False
+
+
 def count_claw_contractions(g,n):
   """
   Counts the numbers of triples a,b,c (without order) whose removal
@@ -191,6 +200,7 @@ def number_of_vertices(g):
   a = len(g)
   a = 2*a
   return int(math.sqrt(a)+1)
+
 def edge_to_index(n,a,b):
   """
   The hard part is g is given as a (n choose 2) binary tuple
@@ -203,6 +213,7 @@ def edge_to_index(n,a,b):
   for i in range(1,a):
     s += n-i
   return s+b-a-1
+
 def index_to_edge(n,i):
   """
   The hard part is g is given as a (n choose 2) binary tuple
@@ -221,6 +232,7 @@ def index_to_edge(n,i):
       afound = True
       b = s-i+n+1
   return [a,b]
+
 def g_has_edge(g,n,a,b):
   """
   Will return true if there is an edge a to b.
@@ -249,6 +261,7 @@ def is_stable(g,n,B):
           return False
         #print("no edge")
   return True
+
 def set_partition_to_type(B):
   """
   Given a set partition like [[1,3],[2,4,5]]
@@ -258,6 +271,7 @@ def set_partition_to_type(B):
   mu = [len(A) for A in B]
   mu.sort(reverse=True)
   return mu
+
 def parts_factorial(pi):
   """
   Given an integer partitions that has r_i parts of size i
@@ -272,6 +286,7 @@ def parts_factorial(pi):
     else:
       c = 1
   return r
+
 def partition_to_index(pi,n):
   """
   Takes an integer partition pi of n and returns the index of 
@@ -284,6 +299,7 @@ def partition_to_index(pi,n):
       return i
     i += 1
   return -1
+
 def number_of_integer_partitions(n):
   """
   Since we are never storing the number of integer partitions
@@ -294,6 +310,7 @@ def number_of_integer_partitions(n):
   for mu in integer_partitions(n):
     c+=1
   return c
+
 def X_monomial(g,n):
   """
   Given a graph g we return the chromatic symmetric function as a 
@@ -314,33 +331,16 @@ def X_monomial(g,n):
 
 """# To Elementary"""
 
-import sys
-!git clone https://github.com/LeeMonet/MLChromatic.git
-sys.path.insert(0,'/content/MLChromatic')
-open("/content/MLChromatic/m_to_e.txt")
-
-import numpy as np
-from pathlib import Path
-import ast
-txt = Path("/content/MLChromatic/m_to_e.txt").read_text()
-all_transitions = ast.literal_eval(txt)
-#print("we have transition matrices from 0 to", len(all_transitions)-1)
-n = 4
-TRANSITION = np.matrix(all_transitions[n])
-#print("dimension of matrix for n =", n,"is:", TRANSITION.shape)
-
-#requires  TRANSITION which is the specific transition matrix from monomial to elementary
-#when we are using n vertices
-def X_elementary(g,n):
+def X_elementary(g,n, TRANSITION):
   """
   Given a graph g on n vertices we return its expansion in the 
   elementary basis as a matrix.
   """
   f = X_monomial(g,n)
   t = np.transpose(np.matrix(f))
-  #TRANSITION = np.matrix(all_transitions[n])
   f_e = TRANSITION*t
   return f_e
+
 def X_as_string(basis, f, n):
   """
   Will give you a pretty string of f as its expansion is basis basis.

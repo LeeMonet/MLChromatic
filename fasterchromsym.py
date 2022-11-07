@@ -70,7 +70,6 @@ def integer_partitions(n):
       k += 1
 
 """# Reward Function Methods"""
-
 def min_nonzero(F):
   """
   Given a list of integers, return the smallest nonzero entry
@@ -88,13 +87,12 @@ def min_nonzero(F):
       if int(F[j])<c:
         c = int(F[j])
   return c
-
+  
 #These methods will take operate on a graph g written as a bitstring of edges.
 def number_of_vertices(g):
   a = len(g)
   a = 2*a
   return int(math.sqrt(a)+1)
-
 def edge_to_index(n,a,b):
   """
   The hard part is g is given as a (n choose 2) binary tuple
@@ -107,7 +105,6 @@ def edge_to_index(n,a,b):
   for i in range(1,a):
     s += n-i
   return s+b-a-1
-
 def index_to_edge(n,i):
   """
   The hard part is g is given as a (n choose 2) binary tuple
@@ -123,10 +120,10 @@ def index_to_edge(n,i):
       a += 1
       s += n-a
     else:
+      #print("a was found to be", a)
       afound = True
-      b = s-i+n+1
+      b = i-s+1+n#s-i+n+1
   return [a,b]
-
 def g_has_edge(g,n,a,b):
   """
   Will return true if there is an edge a to b.
@@ -135,6 +132,7 @@ def g_has_edge(g,n,a,b):
   if g[edge_to_index(n,a,b)]==1:
     return True
   return False
+
 
 def claw_count(g,n):
   """
@@ -158,27 +156,69 @@ def claw_count(g,n):
             count += 1
   return count
 
-def is_connected(g,n,a,b,c):
+def connected_component(g,n,v):
+  """
+  Given a graph g on n vertices, we return the collection
+  of vertices connected to v in g.
+  """
+  vertices = []
+  done = False
+  new_found = [v]
+  while(len(new_found)>0 ):
+    to_search = new_found
+    vertices += new_found
+    new_found = []
+    found = []
+    #print("to search", to_search)
+    #print("new_found before search", new_found)
+    for w in to_search:
+      #print("looking at", w)
+      for b in range(1,n+1):
+        if not w==b:
+          i = 0
+          if w<b:
+            i =  edge_to_index(n,w,b)
+          if w>b:
+            i =  edge_to_index(n,b,w)
+          if g[i]==1:
+            found += [b]
+            #print("found", b)
+    for f in found:
+      if (not (f in vertices)) and (not (f in new_found)):
+        new_found += [f]
+        #print(f, "is new")
+  return vertices
+def is_connected_minus_triple(g,n,a,b,c):
   """
   Given a graph g on n vertices (g given as a binary list of edges)
   We return true if g minus the vertices a, b and c is connected.
   """
   #remove edges connected to a, b and c
+  #print("we are removing", a, b, c)
   h = []
   NN = len(g)
   for i in range(NN):
-    edge = index_to_edge(i)
+    #print("index", i)
+    edge = index_to_edge(n,i)
+    #print("looking at edge", edge)
     x,y = edge[0],edge[1]
     if (x in [a,b,c]) or (y in [a,b,c]):
       h += [0]
     else:
-      h += g[i]
-  alpha = partition_g(h)
-  if alpha == [n-3,1,1,1]:
+      h += [g[i]]
+  v = 1
+  found = False
+  while(found == False):
+    if v in [a,b,c]:
+      v+= 1
+    else:
+      found = True
+  #print("graph with removal", h)
+  #print("looking at connected component of", v)
+  #print("this compoent is", connected_component(h,n,v))
+  if len(connected_component(h,n,v)) == n-3:
     return True
   return False
-
-
 def count_claw_contractions(g,n):
   """
   Counts the numbers of triples a,b,c (without order) whose removal
@@ -188,60 +228,13 @@ def count_claw_contractions(g,n):
   for a in range(1,n+1):
     for b in range(a+1,n+1):
       for c in range(b+1,n+1):
-        if not (g_has_edge(n,a,b) or g_has_edge(n,a,c) or g_has_edge(n,b,c)):
-          if is_connected(g,n,a,b,c):
+        #print("a,b,c:", a,b,c)
+        if not (g_has_edge(g,n,a,b) or g_has_edge(g,n,a,c) or g_has_edge(g,n,b,c)):
+          #print("good triple to look at")
+          if is_connected_minus_triple(g,n,a,b,c):
+            #print("was connected")
             count += 1
   return count
-
-"""# Graph Methods"""
-
-#These methods will take operate on a graph g written as a bitstring of edges.
-def number_of_vertices(g):
-  a = len(g)
-  a = 2*a
-  return int(math.sqrt(a)+1)
-
-def edge_to_index(n,a,b):
-  """
-  The hard part is g is given as a (n choose 2) binary tuple
-  We will need to translate this tuple to edges
-  tuples is written in the order (1,2), (1,3), (1,4), ... (2,3), (2,4), ...
-  """
-  if a==1:
-    return b-2
-  s = 0
-  for i in range(1,a):
-    s += n-i
-  return s+b-a-1
-
-def index_to_edge(n,i):
-  """
-  The hard part is g is given as a (n choose 2) binary tuple
-  We will need to translate this tuple to edges
-  tuples is written in the order (1,2), (1,3), (1,4), ... (2,3), (2,4), ...
-  """
-  afound = False
-  a = 1
-  b = 0
-  s = n-a
-  while(afound == False):
-    if not i<s:
-      a += 1
-      s += n-a
-    else:
-      afound = True
-      b = s-i+n+1
-  return [a,b]
-
-def g_has_edge(g,n,a,b):
-  """
-  Will return true if there is an edge a to b.
-  """
-  #print("checking edge at index", edge_to_index(n,a,b))
-  if g[edge_to_index(n,a,b)]==1:
-    return True
-  return False
-
 """# Monomial Expansion"""
 
 def is_stable(g,n,B):

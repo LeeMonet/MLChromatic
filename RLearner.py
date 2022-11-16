@@ -318,7 +318,7 @@ class RLearner:
           f.write(str(mean_all_reward)+"\n")
         with open('best_elite_rewards_'+log_file_suffix+'.txt', 'a') as f:
           f.write(str(mean_best_reward)+"\n")
-      if (i%200==2): # To create a timeline, like in Figure 3
+      if (True): # To create a timeline, like in Figure 3
         with open('best_species_timeline_txt_'+log_file_suffix+'.txt', 'a') as f:
           f.write(str(super_actions[0]))
           f.write("\n")

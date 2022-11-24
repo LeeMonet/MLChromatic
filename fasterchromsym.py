@@ -216,7 +216,7 @@ def is_connected_minus_triple(g,n,a,b,c):
   #print("graph with removal", h)
   #print("looking at connected component of", v)
   #print("this compoent is", connected_component(h,n,v))
-  if len(connected_component(h,n,v)) == n-3:
+  if len(connected_component(g,n,v))-len(connected_component(h,n,v)) == 3:
     return True
   return False
 def count_claw_contractions(g,n):

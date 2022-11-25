@@ -195,6 +195,11 @@ def is_connected_minus_triple(g,n,a,b,c):
   """
   #remove edges connected to a, b and c
   #print("we are removing", a, b, c)
+  W = connected_component(g,n,a)
+  if len(W)<=4:
+    return False
+  if not (b in W) or not (c in W):
+    return False
   h = []
   NN = len(g)
   for i in range(NN):
@@ -206,17 +211,19 @@ def is_connected_minus_triple(g,n,a,b,c):
       h += [0]
     else:
       h += [g[i]]
-  v = 1
+  index = 0
+  v = 0
   found = False
   while(found == False):
-    if v in [a,b,c]:
-      v+= 1
+    if W[index] in [a,b,c]:
+      index+= 1
     else:
+      v = W[index]
       found = True
   #print("graph with removal", h)
   #print("looking at connected component of", v)
   #print("this compoent is", connected_component(h,n,v))
-  if len(connected_component(g,n,v))-len(connected_component(h,n,v)) == 3:
+  if len(W)-len(connected_component(h,n,v)) == 3:
     return True
   return False
 def count_claw_contractions(g,n):

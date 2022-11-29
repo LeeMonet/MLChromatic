@@ -303,7 +303,7 @@ class RLearner:
       print(  "Mean reward: " + str(mean_all_reward) + "\nSessgen: " + str(sessgen_time) + ", other: " + str(randomcomp_time) + ", select1: " + str(select1_time) + ", select2: " + str(select2_time) + ", select3: " + str(select3_time) +  ", fit: " + str(fit_time) + ", score: " + str(score_time)) 
       
       
-      if (i%20 == 1): #Write all important info to files every 20 iterations
+      if (i%5 == 1): #Write all important info to files every 5 iterations
         with open('best_species_pickle_'+ log_file_suffix +'.txt', 'wb') as fp:
           pickle.dump(super_actions, fp)
         with open('best_species_txt_'+log_file_suffix+'.txt', 'w') as f:

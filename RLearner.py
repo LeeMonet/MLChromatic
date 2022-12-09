@@ -6,12 +6,14 @@ from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense
 from tensorflow.keras.optimizers import SGD, Adam
 from tensorflow.keras.models import load_model
+
+
 from statistics import mean
 import pickle
 import time
 import math
 import matplotlib.pyplot as plt
-
+import networkx as nx #for various graph parameters, such as eigenvalues, matching number, etc
 
 
 
@@ -77,9 +79,9 @@ class RLearner:
     print(f'This learner has been set to generate graphs with {self.N} vertices. \n'
            +f'The agent will be trained with a learning rate of {self.LR} over {self.n_generations} rounds with {self.n_sessions} games each. \n' 
           +f'In each game, the agent will make {self.MYN} decisions. The top {100-self.elite_percentile} percent of games will be used to train the agent.'  
-          +f' The top {100-self.super_percentile} percent of games will survive to the next round. \nThe following is the architecture of the agent:')
+          +f' The top {100-self.super_percentile} percent of games will survive to the next round.')
 
-    print(self.agent.summary())
+    #print(self.agent.summary())
 
   def summary(self):
     print(f'This learner has been set to generate graphs with {self.N} vertices. \n'
@@ -89,8 +91,19 @@ class RLearner:
 
     print(self.agent.summary())
     
+  def makeGraph(self, state):
+    #Construct the graph 
+    G= nx.Graph()
+    G.add_nodes_from(list(range(N)))
+    count = 0
+    for i in range(N):
+      for j in range(i+1,N):
+        if state[count] == 1:
+          G.add_edge(i,j)
+        count += 1  
+    return G
 
-  def generate_session(self, verbose = 1):
+  def generate_session(self, verbose = 0):
     """
     Play n_session games using agent neural network.
     Terminate when games finish 
@@ -118,7 +131,7 @@ class RLearner:
     while (step<MYN):
       step += 1   
       tic = time.time()
-      prob = self.agent.predict(states[:,:,step-1], batch_size = n_sessions) #have agent predict moves for current step for all n games (JN)
+      prob = self.agent.predict(states[:,:,step-1], batch_size = n_sessions, verbose = verbose) #have agent predict moves for current step for all n games (JN)
       pred_time += time.time()-tic
       
       for i in range(n_sessions):
@@ -225,7 +238,9 @@ class RLearner:
     return super_states, super_actions, super_rewards
   
 
-  def run(self, log_file_suffix=None):
+  def run(self, log_file_suffix=None, update_freq = 5, show_best = True):
+
+    round_rewards = []
     #make empty variables
     super_states =  np.empty((0,self.MYN,self.observation_space), dtype = int)
     super_actions = np.array([], dtype = int)
@@ -253,11 +268,24 @@ class RLearner:
       rewards_batch = np.array(sessions[2])
       states_batch = np.transpose(states_batch,axes=[0,2,1])
 
+
+
+      temp = np.argmax(rewards_batch)
+      best_sess_graph = actions_batch[temp], rewards_batch[temp]
+      round_rewards.append(rewards_batch)
+
+
+
       #Add in the super 'sessions' from last round to this round's sessions(JN)
       states_batch = np.append(states_batch,super_states,axis=0)
       if i>0:
         actions_batch = np.append(actions_batch,np.array(super_actions),axis=0) 
       rewards_batch = np.append(rewards_batch,super_rewards)
+
+
+      temp = np.argmax(rewards_batch)
+      best_ever_graph = actions_batch[temp], rewards_batch[temp]      
+
         
       randomcomp_time = time.time()-tic 
       tic = time.time()
@@ -281,7 +309,7 @@ class RLearner:
 
       # Train model on 'elite' sessions (JN)
       tic = time.time()
-      self.agent.fit(elite_states, elite_actions) #learn from the elite sessions
+      self.agent.fit(elite_states, elite_actions, verbose=0) #learn from the elite sessions
       fit_time = time.time()-tic
       
       
@@ -296,14 +324,32 @@ class RLearner:
       mean_best_reward = np.mean(super_rewards) 
 
       score_time = time.time()-tic
-      
-      print("\n" + str(i) +  ". Best individuals: " + str(np.flip(np.sort(super_rewards))))
-      
+
+
+
+      print("\n" + str(i) + f". Top percentile reward: " + str(np.flip(np.sort(super_rewards))) +  " Mean reward: " + str(mean_all_reward) )
+
       #uncomment below line to print out how much time each step in this loop takes. 
-      print(  "Mean reward: " + str(mean_all_reward) + "\nSessgen: " + str(sessgen_time) + ", other: " + str(randomcomp_time) + ", select1: " + str(select1_time) + ", select2: " + str(select2_time) + ", select3: " + str(select3_time) +  ", fit: " + str(fit_time) + ", score: " + str(score_time)) 
+      #print(  "Mean reward: " + str(mean_all_reward) + "\nSessgen: " + str(sessgen_time) + ", other: " + str(randomcomp_time) + ", select1: " + str(select1_time) + ", select2: " + str(select2_time) + ", select3: " + str(select3_time) +  ", fit: " + str(fit_time) + ", score: " + str(score_time)) 
       
-      
-      if (i%20 == 1): #Write all important info to files every 20 iterations
+
+            
+      if show_best:
+        fig, ax = plt.subplots(1, 3,  figsize=(15, 5))
+        nx.draw_kamada_kawai(self.makeGraph(best_sess_graph[0]),ax=ax[0])
+        ax[0].set_title(f'Best Graph of this Round. Score: {best_sess_graph[1]}')
+        nx.draw_kamada_kawai(self.makeGraph(best_ever_graph[0]),ax=ax[1])
+        ax[1].set_title(f'Best Graph Seen So Far. Score: {best_ever_graph[1]}')
+
+        my_mean = [values.mean() for values in round_rewards]
+        ax[2].plot(np.arange(len(my_mean)) + 1, my_mean, color='r')
+        ax[2].boxplot(round_rewards)
+        ax[2].set(xlabel='Round', ylabel='Reward') 
+        plt.show()
+        print(best_sess_graph[0], '\n', best_ever_graph[0])
+
+      #File Stuff      
+      if (i%update_freq == 1 or i==self.n_generations-1): #Write all important info to files every 20 iterations
         with open('best_species_pickle_'+ log_file_suffix +'.txt', 'wb') as fp:
           pickle.dump(super_actions, fp)
         with open('best_species_txt_'+log_file_suffix+'.txt', 'w') as f:
@@ -318,7 +364,6 @@ class RLearner:
           f.write(str(mean_all_reward)+"\n")
         with open('best_elite_rewards_'+log_file_suffix+'.txt', 'a') as f:
           f.write(str(mean_best_reward)+"\n")
-      if (True): # To create a timeline, like in Figure 3
         with open('best_species_timeline_txt_'+log_file_suffix+'.txt', 'a') as f:
           f.write(str(super_actions[0]))
           f.write("\n")

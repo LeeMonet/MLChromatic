@@ -14,6 +14,77 @@ import more_itertools as mit
 import scipy.special
 import numpy as np 
 
+import math
+import scipy.special
+from collections import defaultdict
+from itertools import product, combinations
+
+
+def edge_to_index(n,a,b):
+  """
+  The hard part is g is given as a (n choose 2) binary tuple
+  We will need to translate this tuple to edges
+  tuples is written in the order (1,2), (1,3), (1,4), ... (2,3), (2,4), ...
+  """
+  # Mathematica: Sum[n - i, {i, 1, a - 1}] + b - a - 1 // Simplify
+  return int(b + a*(n-1/2)-n-(a*a)/2-1)
+
+def net_count(g,n):
+  """
+  counts the number of induced nets
+  graph g as C(n,2)-length array of 0/1 indicators of edges
+    (1,2),...,(1,n),(2,3),...,(2,n),...,(n-1,n)
+  """
+  adjMat = defaultdict(int)
+  nbhd = defaultdict(set)
+
+  count = 0 # number of induced nets
+
+  # Data structures: Dictionary adjacency matrix for a<b
+  #   Set neighborhood regardless of order
+  # Loop through the input 01 string tracking a,b and storing
+  idx = 0   # position in input array
+  for a in range(1,n+1):
+    for b in range(a+1,n+1):
+      if(g[idx]==1):
+        adjMat[(a,b)] = 1
+        nbhd[a] = nbhd[a].union(set([b]))
+        nbhd[b] = nbhd[b].union(set([a]))
+      idx += 1
+
+  # An induced net has a triangle x<y<z and
+  #   a perfect matching from {x,y,z} to {a,b,c}
+  #   conditioned on (1) {a,b,c} being an independent set
+  #              and (2) No other edges from {x,y,z} to {a,b,c}
+  # Counting strategy: Loop over x, then y>x in nbhd[x],
+  #   then z>y in nbhd[x]\cap nbhd[y]
+  #   Construct A = N(x)-(N(y)\cup N(z)\cup {y,z})
+  #             B = N(y)-(N(x)\cup N(z)\cup {x,z})
+  #             C = N(z)-(N(x)\cup N(y)\cup {x,y})
+  #     (actually we drop the last \cup {*,*}, redundant)
+  #   Inner loop over A x B x C: add 1 to count if = I_3
+
+  for x in range(1,n+1):
+    for y in [_ for _ in nbhd[x] if _ > x]:
+      for z in [_ for _ in nbhd[x].intersection(nbhd[y]) if _ > y]:
+        A = nbhd[x] - nbhd[y].union(nbhd[z])
+        B = nbhd[y] - nbhd[x].union(nbhd[z])
+        C = nbhd[z] - nbhd[x].union(nbhd[y])
+        # print((x,y,z),A,B,C,[_ for _ in product(A,B,C)])
+        for w in product(A,B,C):
+          w = sorted(w)
+          # print(w,adjMat[w[0],w[1]], adjMat[w[0],w[2]],adjMat[w[1],w[2]])
+          count = count + 1 - max(adjMat[w[0],w[1]], adjMat[w[0],w[2]], adjMat[w[1],w[2]])
+  return count
+
+def edges_to_bitlist(edge_tuples, n):
+  # Input: list of edge tuples [(i1,j1),(i2,j2),...] and number vertices n
+  # Output: The C(n,2)-long 01 bit-list encoding the graph
+  bitlist = [0]*int(n*(n-1)/2)
+  for edge in edge_tuples:
+    edge = sorted(edge)
+    bitlist[edge_to_index(n,edge[0],edge[1])] = 1
+  return bitlist
 
 def integer_partitions(n):
   """"""
@@ -93,18 +164,7 @@ def number_of_vertices(g):
   a = len(g)
   a = 2*a
   return int(math.sqrt(a)+1)
-def edge_to_index(n,a,b):
-  """
-  The hard part is g is given as a (n choose 2) binary tuple
-  We will need to translate this tuple to edges
-  tuples is written in the order (1,2), (1,3), (1,4), ... (2,3), (2,4), ...
-  """
-  if a==1:
-    return b-2
-  s = 0
-  for i in range(1,a):
-    s += n-i
-  return s+b-a-1
+
 def index_to_edge(n,i):
   """
   The hard part is g is given as a (n choose 2) binary tuple
@@ -124,6 +184,8 @@ def index_to_edge(n,i):
       afound = True
       b = i-s+1+n#s-i+n+1
   return [a,b]
+
+
 def g_has_edge(g,n,a,b):
   """
   Will return true if there is an edge a to b.

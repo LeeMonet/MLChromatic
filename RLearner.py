@@ -94,10 +94,10 @@ class RLearner:
   def makeGraph(self, state):
     #Construct the graph 
     G= nx.Graph()
-    G.add_nodes_from(list(range(N)))
+    G.add_nodes_from(list(range(self.N)))
     count = 0
-    for i in range(N):
-      for j in range(i+1,N):
+    for i in range(self.N):
+      for j in range(i+1,self.N):
         if state[count] == 1:
           G.add_edge(i,j)
         count += 1  

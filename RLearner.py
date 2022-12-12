@@ -327,7 +327,7 @@ class RLearner:
 
 
 
-      print("\n" + str(i) + f". Top percentile reward: " + str(np.flip(np.sort(super_rewards))) +  " Mean reward: " + str(mean_all_reward) )
+      print("\n" + str(i) + f". Top percentile reward: " + str(np.flip(np.sort(super_rewards))) +  " Mean reward of Top 100: " + str(mean_all_reward) )
 
       #uncomment below line to print out how much time each step in this loop takes. 
       #print(  "Mean reward: " + str(mean_all_reward) + "\nSessgen: " + str(sessgen_time) + ", other: " + str(randomcomp_time) + ", select1: " + str(select1_time) + ", select2: " + str(select2_time) + ", select3: " + str(select3_time) +  ", fit: " + str(fit_time) + ", score: " + str(score_time)) 

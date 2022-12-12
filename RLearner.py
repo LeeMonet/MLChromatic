@@ -238,7 +238,7 @@ class RLearner:
     return super_states, super_actions, super_rewards
   
 
-  def run(self, log_file_suffix=None, update_freq = 5, show_best = True):
+  def run(self, log_file_suffix=None, update_freq = 5, show_best = True, info_func = None):
 
     round_rewards = []
     #make empty variables
@@ -347,6 +347,8 @@ class RLearner:
         ax[2].set(xlabel='Round', ylabel='Reward') 
         plt.show()
         print(best_sess_graph[0], '\n', best_ever_graph[0])
+        if not info_func is None:
+          info_func(best_sess_graph[0], best_ever_graph[0])
 
       #File Stuff      
       if (i%update_freq == 1 or i==self.n_generations-1): #Write all important info to files every 20 iterations
